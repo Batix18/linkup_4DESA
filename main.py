@@ -111,6 +111,41 @@ def get_all_users():
     })
     return jsonify(datas)
 
+
+@app.route('/users', methods=['PUT'])
+@jwt_required()
+def put_user():
+    email = request.json.get("email", None)
+    public = request.json.get("is_public", None)
+    password = request.json.get("password", None)
+
+    current_user_id = get_jwt_identity()
+    try:
+        conn = get_conn()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET email = '"+email+"', is_public = '"+public+"', password = '"+password+"' WHERE id = '"+current_user_id+"'")
+        cursor.commit()
+        return jsonify({"State": 201})
+    except Exception as e:
+        print(e)
+    return jsonify({"State": 400})
+
+
+#Route pour le get des users
+@app.route("/users",methods=['DELETE'])
+@jwt_required()
+def get_all_users():
+    current_user_id = get_jwt_identity()
+    try:
+        conn = connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM users WHERE id='"+current_user_id+"'")
+        conn.commit()
+        return jsonify({"State": 201})
+    except Exception as e:
+        print(e)
+        return jsonify({"State": 400})
+
 #Route pour la creation d'un post
 @app.route("/posts",methods=['POST'])
 @jwt_required() 
