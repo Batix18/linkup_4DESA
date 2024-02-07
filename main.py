@@ -228,8 +228,9 @@ def post_attachments():
 
     try:
         fichier = request.files['namefile']
-        blob_client = container_client.get_blob_client(fichier)
-        blob_client.upload_blob(fichier)
+        namefile = fichier.filename.replace(" ", "")
+        blob_client = container_client.get_blob_client(namefile)
+        blob_client.upload_blob(namefile)
         name = "https://linkupstorageabj.blob.core.windows.net/linkupabj/" + fichier
         conn = connection()
         cursor = conn.cursor()

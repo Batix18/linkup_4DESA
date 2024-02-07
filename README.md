@@ -128,3 +128,4 @@ az webapp config appsettings set `
     --resource-group $resourceGroupName `
     --name $appName `
     --settings AZURE_CONNECTION_STORAGE=$connectionstring.connectionString
+```
