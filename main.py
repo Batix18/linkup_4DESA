@@ -2,21 +2,30 @@ import psycopg2, struct ,os
 import json
 from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from datetime import timedelta
 
 host = os.environ["AZURE_SQL_HOST"]
 dbname = os.environ["AZURE_SQL_DB"]
 user = os.environ["AZURE_SQL_USER"]
 password = os.environ["AZURE_SQL_PASSWORD"]
 sslmode = "require"
-
+ACCESS_EXPIRES = timedelta(hours=1)
 
 app = Flask(__name__)
+app.config["JWT_SECRET_KEY"] = os.environ["APP_SUPER_KEY"] 
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
+jwt = JWTManager(app)
+
+#Page d'acceuil
 @app.route("/")
 def index():
     return "<h1>Hello LINKUP!</h1>"
 
-
+#Route pour le delete de post
 @app.route('/post', methods=['DELETE'])
+@jwt_required() 
 def delete_post():
     uid = request.args.get("id", None)
 
@@ -28,17 +37,110 @@ def delete_post():
             DELETE FROM post
             WHERE users='"""+current_user_id+"""' and id= '"""+uid+"""'
         """)
-        cursor.commit()
+        conn.commit()
         return jsonify({"State": 201})
     except Exception as e:
         print(e)
 
     return jsonify({"State": 400})
 
+#USERS
+#Route pour login
+@app.route("/login",methods=['POST'])
+def post_login():
+    email = request.json.get('email')
+    password = request.json.get('password')
+
+    data_login=[]
+    try:
+        conn = connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM users where email='"+email+"' and password='"+password+"';")
+        data_login = cursor.fetchall()
+    except Exception as e:
+        print(e)
+
+    if len(data_login)!=1:
+         return jsonify({"Message": "Erreur dans l'email ou dans le password"}), 401
+    
+    token_access = create_access_token(identity=email)
+    return jsonify({ "token": token_access, "email": email })
+
+#Route pour le register
+@app.route("/register",methods=['POST'])
+def post_register():
+    email = request.json.get('email')
+    password = request.json.get('password')
+
+    data_login=[]
+    try:
+        conn = connection()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO users(email,password) VALUES ('"+email+"','"+password+"');")
+        conn.commit()
+        return jsonify({"State": 201})
+    except Exception as e:
+        print(e)
+        return jsonify({"State": 400})
+ 
+#Route pour le get des users
+@app.route("/users",methods=['GET'])
+def get_all_users():
+    email = request.json.get('email',None)
+
+    informations = []
+    try:
+        conn = connection()
+        cursor = conn.cursor()
+        if email != None:
+            cursor.execute("SELECT * FROM users where email='"+email+"';")
+        else:
+            cursor.execute("SELECT * FROM users;")
+        informations = cursor.fetchall()
+    except Exception as e:
+        print(e)
+        
+    datas=[]
+    print(len(informations))
+    for information in informations:
+        datas.append({
+        "id": information[0],
+        "email": information[1],
+        "is_public": information[3],
+        "is_admin": information[4]
+    })
+    return jsonify(datas)
+
+#Route pour la creation d'un post
+@app.route("/posts",methods=['POST'])
+@jwt_required() 
+def post_posts():
+    contenu = request.json.get('contenu')
+
+    data_login=[]
+    try:
+        conn = connection()
+        cursor = conn.cursor()
+        cursor.execute("INSERT INTO post(textContents,postAt,) VALUES ('"+email+"','"+password+"');")
+        conn.commit()
+        return jsonify({"State": 201})
+    except Exception as e:
+        print(e)
+        return jsonify({"State": 400})
 
 
-@app.route("/start", methods=['GET'])
-def start():
+
+
+
+
+
+
+
+
+
+#Route de creation de table
+@app.route("/creation_table", methods=['GET'])
+def creation_table():
     try:
         conn = connection()
         cursor = conn.cursor()
@@ -88,6 +190,7 @@ def start():
         print(e)
 
     return "<h1>start fini</h1>"
+
 
 
 if __name__ == "__main__":
