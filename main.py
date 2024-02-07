@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from datetime import timedelta
+from datetime import timedelta ,datetime
 
 host = os.environ["AZURE_SQL_HOST"]
 dbname = os.environ["AZURE_SQL_DB"]
@@ -63,8 +63,8 @@ def post_login():
     if len(data_login)!=1:
          return jsonify({"Message": "Erreur dans l'email ou dans le password"}), 401
     
-    token_access = create_access_token(identity=email)
-    return jsonify({ "token": token_access, "email": email })
+    token_access = create_access_token(identity=data_login[0][0])
+    return jsonify({ "token": token_access, "uid": data_login[0][0] })
 
 #Route pour le register
 @app.route("/register",methods=['POST'])
@@ -93,7 +93,7 @@ def get_all_users():
         conn = connection()
         cursor = conn.cursor()
         if email != None:
-            cursor.execute("SELECT * FROM users where email='"+email+"';")
+            cursor.execute("SELECT * FROM users WHERE email='"+email+"';")
         else:
             cursor.execute("SELECT * FROM users;")
         informations = cursor.fetchall()
@@ -116,26 +116,52 @@ def get_all_users():
 @jwt_required() 
 def post_posts():
     contenu = request.json.get('contenu')
-
+    formatted_date = datetime.now().strftime("%d, %B, %Y")
+    print(formatted_date)
+    current_user_id = get_jwt_identity()
     data_login=[]
     try:
         conn = connection()
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO post(textContents,postAt,) VALUES ('"+email+"','"+password+"');")
+        cursor.execute("INSERT INTO post(textContents,postAt,users) VALUES ('"+contenu+"','"+str(formatted_date)+"','"+str(current_user_id)+"');")
         conn.commit()
         return jsonify({"State": 201})
     except Exception as e:
         print(e)
         return jsonify({"State": 400})
 
+#Route pour recuperer les posts d'un user
+@app.route("/posts",methods=['GET'])
+@jwt_required() 
+def get_posts():
+    email = request.json.get('email',None)
+    informations = []
+    try:
+        conn = connection()
+        cursor = conn.cursor()
+        if email != None:
+            cursor.execute("SELECT * FROM posts p INNER JOIN users u on u.id = p.users WHERE u.is_public = true;")
+        else:
+            cursor.execute("SELECT * FROM posts p INNER JOIN users u on u.id = p.users WHERE u.is_public = true and u.email ='"+email+"';")
+        informations = cursor.fetchall()
+    except Exception as e:
+        print(e)
+        
+    datas=[]
+    print(len(informations))
+    for information in informations:
+        datas.append({
+        "id": information[0],
+        "contenu": information[1],
+        "postAt": information[2],
+        "user": information[3]
+    })
+    return jsonify(datas)
 
-
-
-
-
-
-
-
+#Route pour recuperer les posts d'un user
+@app.route("/attchment",methods=['GET'])
+@jwt_required() 
+def get_posts():
 
 
 #Route de creation de table
