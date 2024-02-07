@@ -17,24 +17,24 @@ az login
 
 #general
 $location = 'westus3'
-$resourceGroupName = 'ltestbois'
-$storageAccountName = 'testboisstorage'
-$contenaire='testbois'
+$resourceGroupName = 'linkupabj'
+$storageAccountName = 'linkupabjstorage'
+$contenaire='linkupabj'
 
 
-$server='ltestboisserveurdb'
+$server='linkupabjserveurdb'
 $logindb='superadmin'
 $ServerDBpassword='/Password37'
-$databaseName='inkupajbdb'
+$databaseName='linkupabjdb'
 $sku="B_Gen5_1"
 $startIp="0.0.0.0"
 $endIp="255.255.255.255"
 
-$appName="ltestboiswebapp"
-$planName="testboisplan"
+$appName="linkupabjwebapp"
+$planName="linkupabjplan"
 $gitrepo="https://github.com/Batix18/linkup_4DESA.git"
 
-$superkeyapp="totototo"
+$superkeyapp="superclef"
 
 
 az group create `
