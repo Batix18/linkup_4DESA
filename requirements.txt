@@ -1,0 +1,12 @@
+gunicorn
+Flask
+flask_swagger_ui
+flask-cors
+flask_jwt_extended
+psycopg2
+Werkzeug
+pydantic
+azure-identity
+pyodbc
+python-dotenv
+azure.storage.blob
