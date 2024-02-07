@@ -5,6 +5,7 @@ from flask_jwt_extended import JWTManager
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import timedelta ,datetime
+from azure.storage.blob import BlobServiceClient
 
 host = os.environ["AZURE_SQL_HOST"]
 dbname = os.environ["AZURE_SQL_DB"]
@@ -17,6 +18,13 @@ app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = os.environ["APP_SUPER_KEY"] 
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = ACCESS_EXPIRES
 jwt = JWTManager(app)
+
+blob_service_client = BlobServiceClient.from_connection_string(conn_str=os.getenv('AZURE_CONNECTION_STORAGE'))
+try:
+    container_client = blob_service_client.get_container_client(container="linkupabj")
+    container_client.get_container_properties()
+except Exception as e:
+    container_client = blob_service_client.create_container("linkupabj")
 
 #Page d'acceuil
 @app.route("/")
@@ -115,31 +123,31 @@ def get_all_users():
 @app.route('/users', methods=['PUT'])
 @jwt_required()
 def put_user():
-    email = request.json.get("email", None)
-    public = request.json.get("is_public", None)
-    password = request.json.get("password", None)
+    email = request.json.get("email")
+    public = request.json.get("is_public")
+    password = request.json.get("password")
 
     current_user_id = get_jwt_identity()
     try:
-        conn = get_conn()
+        conn = connection()
         cursor = conn.cursor()
-        cursor.execute("UPDATE users SET email = '"+email+"', is_public = '"+public+"', password = '"+password+"' WHERE id = '"+current_user_id+"'")
-        cursor.commit()
+        cursor.execute("UPDATE users SET email = '"+email+"', is_public = '"+public+"', password = '"+password+"' WHERE id = '"+str(current_user_id)+"'")
+        conn.commit()
         return jsonify({"State": 201})
     except Exception as e:
         print(e)
     return jsonify({"State": 400})
 
 
-#Route pour le get des users
+#Route pour le delete des users
 @app.route("/users",methods=['DELETE'])
 @jwt_required()
-def get_all_users():
+def delete_users():
     current_user_id = get_jwt_identity()
     try:
         conn = connection()
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM users WHERE id='"+current_user_id+"'")
+        cursor.execute("DELETE FROM users WHERE id='"+str(current_user_id)+"'")
         conn.commit()
         return jsonify({"State": 201})
     except Exception as e:
@@ -174,16 +182,15 @@ def get_posts():
     try:
         conn = connection()
         cursor = conn.cursor()
-        if email != None:
-            cursor.execute("SELECT * FROM posts p INNER JOIN users u on u.id = p.users WHERE u.is_public = true;")
+        if email == None:
+            cursor.execute("SELECT * FROM post p INNER JOIN users u on u.id = p.users WHERE u.is_public = true;")
         else:
-            cursor.execute("SELECT * FROM posts p INNER JOIN users u on u.id = p.users WHERE u.is_public = true and u.email ='"+email+"';")
+            cursor.execute("SELECT * FROM post p INNER JOIN users u on u.id = p.users WHERE u.is_public = true and u.email ='"+email+"';")
         informations = cursor.fetchall()
     except Exception as e:
         print(e)
         
     datas=[]
-    print(len(informations))
     for information in informations:
         datas.append({
         "id": information[0],
@@ -193,10 +200,51 @@ def get_posts():
     })
     return jsonify(datas)
 
-#Route pour recuperer les posts d'un user
-@app.route("/attchment",methods=['GET'])
-@jwt_required() 
-def get_posts():
+#Route pour le delete de post
+@app.route("/posts",methods=['DELETE'])
+@jwt_required()
+def delete_posts():
+    post_id = request.json.get('id')
+    current_user_id = get_jwt_identity()
+    attachements = []
+    try:
+        conn = connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM attachements a USING  post p WHERE p.id = a.post and a.post='"+str(post_id)+"' and p.users='"+str(current_user_id)+"';")
+        cursor.execute("DELETE FROM post p WHERE p.id='"+str(post_id)+"' and p.users='"+str(current_user_id)+"';")
+        conn.commit()
+        return jsonify({"State": 201})
+    except Exception as e:
+        print(e)
+        return jsonify({"State": 400})
+
+
+@app.route('/attachments', methods=['POST'])
+@jwt_required()
+def post_attachments():
+    current_user_id = get_jwt_identity()
+    description= request.json.get('description')
+    postid = request.json.get('postid')
+    try:
+        fichier = request.files['namefile']
+        blob_client = container_client.get_blob_client(fichier)
+        blob_client.upload_blob(fichier)
+        name = "https://linkupstorageabj.blob.core.windows.net/linkupabj/" + fichier
+        conn = get_conn()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO attachements(fileurl, description , post)
+            VALUES ('"""+name+"""','"""+description+"""''"""+postid+"""');
+        """)
+        cursor.commit()
+       
+        return jsonify({"State": 201})
+    except Exception as e:
+        print(e)
+        return jsonify({"State": 400,
+                    "error": str(e)})
+        
+
 
 
 #Route de creation de table
