@@ -6,6 +6,7 @@ from flask_jwt_extended import create_access_token
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import timedelta ,datetime
 from azure.storage.blob import BlobServiceClient
+from flask_swagger_ui import get_swaggerui_blueprint
 
 host = os.environ["AZURE_SQL_HOST"]
 dbname = os.environ["AZURE_SQL_DB"]
@@ -25,6 +26,22 @@ try:
     container_client.get_container_properties()
 except Exception as e:
     container_client = blob_service_client.create_container("linkupabj")
+
+#--------------------------
+SWAGGER_URL = '/api/docs'  # URL for exposing Swagger UI (without trailing '/')
+API_URL = '/static/swagger.json'  # Our API url (can of course be a local resource)
+
+# Call factory function to create our blueprint
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,  # Swagger UI static files will be mapped to '{SWAGGER_URL}/dist/'
+    API_URL,
+    config={  # Swagger UI config overrides
+        'app_name': "Test application"
+    },
+)
+
+app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
+#--------------------------
 
 #Page d'acceuil
 @app.route("/")

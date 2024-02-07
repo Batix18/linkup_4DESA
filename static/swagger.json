@@ -1,0 +1,259 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "title": "LinkUp API",
+      "description": "API for managing users, posts, and attachments",
+      "version": "1.0"
+    },
+    "paths": {
+      "/login": {
+        "post": {
+          "summary": "Endpoint to authenticate users",
+          "parameters": [
+            {
+              "name": "email",
+              "in": "body",
+              "description": "User's email",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "password",
+              "in": "body",
+              "description": "User's password",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful login",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {"type": "string"},
+                  "uid": {"type": "integer"}
+                }
+              }
+            },
+            "401": {
+              "description": "Invalid email or password"
+            }
+          }
+        }
+      },
+      "/register": {
+        "post": {
+          "summary": "Endpoint to register new users",
+          "parameters": [
+            {
+              "name": "email",
+              "in": "body",
+              "description": "User's email",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "password",
+              "in": "body",
+              "description": "User's password",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "User successfully registered"
+            },
+            "400": {
+              "description": "Failed to register user"
+            }
+          }
+        }
+      },
+      "/users": {
+        "get": {
+          "summary": "Endpoint to retrieve user information",
+          "parameters": [
+            {
+              "name": "email",
+              "in": "query",
+              "description": "Email address of the user to retrieve (optional)",
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "User information retrieved successfully",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {"type": "integer"},
+                    "email": {"type": "string"},
+                    "is_public": {"type": "boolean"},
+                    "is_admin": {"type": "boolean"}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "summary": "Endpoint to update user information",
+          "parameters": [
+            {
+              "name": "email",
+              "in": "body",
+              "description": "User's new email (optional)",
+              "required": false,
+              "type": "string"
+            },
+            {
+              "name": "is_public",
+              "in": "body",
+              "description": "User's new public status (optional)",
+              "required": false,
+              "type": "boolean"
+            },
+            {
+              "name": "password",
+              "in": "body",
+              "description": "User's new password (optional)",
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "User information updated successfully"
+            },
+            "400": {
+              "description": "Failed to update user information"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Endpoint to delete a user",
+          "responses": {
+            "201": {
+              "description": "User deleted successfully"
+            },
+            "400": {
+              "description": "Failed to delete user"
+            }
+          }
+        }
+      },
+      "/posts": {
+        "post": {
+          "summary": "Endpoint to create a new post",
+          "parameters": [
+            {
+              "name": "contenu",
+              "in": "body",
+              "description": "Content of the post",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Post created successfully"
+            },
+            "400": {
+              "description": "Failed to create post"
+            }
+          }
+        },
+        "get": {
+          "summary": "Endpoint to retrieve posts",
+          "parameters": [
+            {
+              "name": "email",
+              "in": "query",
+              "description": "Email address of the user whose posts to retrieve (optional)",
+              "required": false,
+              "type": "string"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Posts retrieved successfully",
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {"type": "integer"},
+                    "contenu": {"type": "string"},
+                    "postAt": {"type": "string"},
+                    "user": {"type": "integer"}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "summary": "Endpoint to delete a post",
+          "parameters": [
+            {
+              "name": "id",
+              "in": "body",
+              "description": "ID of the post to delete",
+              "required": true,
+              "type": "integer"
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Post deleted successfully"
+            },
+            "400": {
+              "description": "Failed to delete post"
+            }
+          }
+        }
+      },
+      "/attachments": {
+        "post": {
+          "summary": "Endpoint to upload attachments",
+          "parameters": [
+            {
+              "name": "description",
+              "in": "body",
+              "description": "Description of the attachment",
+              "required": true,
+              "type": "string"
+            },
+            {
+              "name": "postid",
+              "in": "body",
+              "description": "ID of the post the attachment belongs to",
+              "required": true,
+              "type": "integer"
+            },
+            {
+              "name": "namefile",
+              "in": "formData",
+              "description": "Attachment file",
+              "required": true,
+              "type": "file"
+            }
+          ],
+          "responses": {
+            "201": {
+              "description": "Attachment uploaded successfully"
+            },
+            "400": {
+              "description": "Failed to upload attachment"
+            }
+          }
+        }
+      }
+    }
+  }
+  
