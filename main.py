@@ -292,7 +292,7 @@ def get_attachemet(id):
     try:
         conn = connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM attachements a WHERE a.post = "+id+";")
+        cursor.execute("SELECT * FROM attachements a WHERE a.post = "+str(id)+";")
         informations = cursor.fetchall()
     except Exception as e:
         print(e)
