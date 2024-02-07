@@ -31,27 +31,6 @@ except Exception as e:
 def index():
     return "<h1>Hello LINKUP!</h1>"
 
-#Route pour le delete de post
-@app.route('/post', methods=['DELETE'])
-@jwt_required() 
-def delete_post():
-    uid = request.args.get("id", None)
-
-    current_user_id = get_jwt_identity()
-    try:
-        conn = connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            DELETE FROM post
-            WHERE users='"""+current_user_id+"""' and id= '"""+uid+"""'
-        """)
-        conn.commit()
-        return jsonify({"State": 201})
-    except Exception as e:
-        print(e)
-
-    return jsonify({"State": 400})
-
 #USERS
 #Route pour login
 @app.route("/login",methods=['POST'])
@@ -173,6 +152,7 @@ def post_posts():
         print(e)
         return jsonify({"State": 400})
 
+
 #Route pour recuperer les posts d'un user
 @app.route("/posts",methods=['GET'])
 @jwt_required() 
@@ -196,9 +176,11 @@ def get_posts():
         "id": information[0],
         "contenu": information[1],
         "postAt": information[2],
-        "user": information[3]
+        "user": information[3],
+        "attachments": get_attachemet(information[0])
     })
     return jsonify(datas)
+
 
 #Route pour le delete de post
 @app.route("/posts",methods=['DELETE'])
@@ -245,8 +227,6 @@ def post_attachments():
         print(e)
         return jsonify({"State": 400,
                     "error": str(e)})
-        
-
 
 
 #Route de creation de table
@@ -306,6 +286,26 @@ def creation_table():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+def get_attachemet(id):
+    informations = []
+    try:
+        conn = connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM attachements a WHERE a.post = "+id+";")
+        informations = cursor.fetchall()
+    except Exception as e:
+        print(e)
+        
+    datas=[]
+    for information in informations:
+        datas.append({
+        "id": information[0],
+        "fileurl": information[1],
+        "description": information[2],
+    })
+    return datas
+
 
 
 def connection():
