@@ -223,18 +223,19 @@ def delete_posts():
 @jwt_required()
 def post_attachments():
     current_user_id = get_jwt_identity()
-    description= request.form('description')
-    postid = request.form('postid')
+    description= request.form['description']
+    postid = request.form['postid']
+
     try:
         fichier = request.files['namefile']
         blob_client = container_client.get_blob_client(fichier)
         blob_client.upload_blob(fichier)
         name = "https://linkupstorageabj.blob.core.windows.net/linkupabj/" + fichier
-        conn = get_conn()
+        conn = connection()
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO attachements(fileurl, description , post)
-            VALUES ('"""+name+"""','"""+description+"""''"""+postid+"""');
+            VALUES ('"""+name+"""','"""+description+"""''"""+str(postid)+"""');
         """)
         cursor.commit()
        
