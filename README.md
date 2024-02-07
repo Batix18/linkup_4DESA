@@ -27,8 +27,8 @@ $logindb='superadmin'
 $ServerDBpassword='/Password37'
 $databaseName='inkupajbdb'
 $sku="B_Gen5_1"
-$startIp=0.0.0.0
-$endIp=255.255.255.255
+$startIp="0.0.0.0"
+$endIp="255.255.255.255"
 
 $appName="ltestboiswebapp"
 $planName="testboisplan"
@@ -69,7 +69,7 @@ az postgres server firewall-rule create --resource-group $resourceGroupName `
                                         --start-ip-address $startIp `
                                         --end-ip-address $endIp 
 
-az postgres db create -g $resourceGroup `
+az postgres db create -g $resourceGroupName `
                       -s $server `
                       -n $databaseName
 
@@ -127,4 +127,4 @@ az webapp config appsettings set `
 az webapp config appsettings set `
     --resource-group $resourceGroupName `
     --name $appName `
-    --settings AZURE_CONNECTION_STORAGE=$connectionstring
+    --settings AZURE_CONNECTION_STORAGE=$connectionstring.connectionString
