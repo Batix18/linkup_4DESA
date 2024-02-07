@@ -123,7 +123,7 @@ def put_user():
     try:
         conn = get_conn()
         cursor = conn.cursor()
-        cursor.execute("UPDATE users SET email = '"+email+"', is_public = '"+public+"', password = '"+password+"' WHERE id = '"+current_user_id+"'")
+        cursor.execute("UPDATE users SET email = '"+email+"', is_public = '"+public+"', password = '"+password+"' WHERE id = '"+str(current_user_id)+"'")
         cursor.commit()
         return jsonify({"State": 201})
     except Exception as e:
@@ -139,7 +139,7 @@ def get_all_users():
     try:
         conn = connection()
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM users WHERE id='"+current_user_id+"'")
+        cursor.execute("DELETE FROM users WHERE id='"+str(current_user_id)+"'")
         conn.commit()
         return jsonify({"State": 201})
     except Exception as e:
