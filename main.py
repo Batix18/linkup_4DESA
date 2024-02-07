@@ -231,12 +231,12 @@ def post_attachments():
         namefile = fichier.filename.replace(" ", "")
         blob_client = container_client.get_blob_client(namefile)
         blob_client.upload_blob(namefile)
-        name = "https://linkupstorageabj.blob.core.windows.net/linkupabj/" + fichier
+        name = "https://linkupstorageabj.blob.core.windows.net/linkupabj/" + namefile
         conn = connection()
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO attachements(fileurl, description , post)
-            VALUES ('"""+name+"""','"""+description+"""''"""+str(postid)+"""');
+            VALUES ('"""+name+"""','"""+description+"""','"""+str(postid)+"""');
         """)
         conn.commit()
        
