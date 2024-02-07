@@ -237,7 +237,7 @@ def post_attachments():
             INSERT INTO attachements(fileurl, description , post)
             VALUES ('"""+name+"""','"""+description+"""''"""+str(postid)+"""');
         """)
-        cursor.commit()
+        conn.commit()
        
         return jsonify({"State": 201})
     except Exception as e:
