@@ -223,8 +223,8 @@ def delete_posts():
 @jwt_required()
 def post_attachments():
     current_user_id = get_jwt_identity()
-    description= request.json.get('description')
-    postid = request.json.get('postid')
+    description= request.form('description')
+    postid = request.form('postid')
     try:
         fichier = request.files['namefile']
         blob_client = container_client.get_blob_client(fichier)
