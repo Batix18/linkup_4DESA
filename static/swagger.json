@@ -5,6 +5,14 @@
       "description": "API for managing users, posts, and attachments",
       "version": "1.0"
     },
+    "servers": [
+      {
+        "url": "https://linkupabjwebapp.azurewebsites.net/"
+      },
+      {
+         "url": "https://localhost:5000/"
+      }
+    ],
     "paths": {
       "/login": {
         "post": {

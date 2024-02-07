@@ -112,7 +112,7 @@ az webapp config appsettings set `
 az webapp config appsettings set `
     --resource-group $resourceGroupName `
     --name $appName `
-    --settings AZURE_SQL_USER=$logindb
+    --settings AZURE_SQL_USER="$($logindb)@$($server)"
 
 az webapp config appsettings set `
     --resource-group $resourceGroupName `
