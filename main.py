@@ -115,7 +115,7 @@ def get_all_users():
     })
     return jsonify(datas)
 
-
+#Route pour l'update des users
 @app.route('/users', methods=['PUT'])
 @jwt_required()
 def put_user():
@@ -134,7 +134,6 @@ def put_user():
         print(e)
     return jsonify({"State": 400})
 
-
 #Route pour le delete des users
 @app.route("/users",methods=['DELETE'])
 @jwt_required()
@@ -150,6 +149,7 @@ def delete_users():
         print(e)
         return jsonify({"State": 400})
 
+#POST
 #Route pour la creation d'un post
 @app.route("/posts",methods=['POST'])
 @jwt_required() 
@@ -168,7 +168,6 @@ def post_posts():
     except Exception as e:
         print(e)
         return jsonify({"State": 400})
-
 
 #Route pour recuperer les posts d'un user
 @app.route("/posts",methods=['GET'])
@@ -198,8 +197,7 @@ def get_posts():
     })
     return jsonify(datas)
 
-
-#Route pour le delete de post
+#Route pour le delete de post et des attachments si il y a
 @app.route("/posts",methods=['DELETE'])
 @jwt_required()
 def delete_posts():
@@ -217,7 +215,8 @@ def delete_posts():
         print(e)
         return jsonify({"State": 400})
 
-
+#ATTACHMENT
+#Route de publication des attachments 
 @app.route('/attachments', methods=['POST'])
 @jwt_required()
 def post_attachments():
@@ -245,7 +244,7 @@ def post_attachments():
         return jsonify({"State": 400,
                     "error": str(e)})
 
-
+#DATABASE
 #Route de creation de table
 @app.route("/creation_table", methods=['GET'])
 def creation_table():
@@ -304,6 +303,7 @@ def creation_table():
 if __name__ == "__main__":
     app.run(debug=True)
 
+#Fonction permettant d'obtenir les attachments d'un post
 def get_attachemet(id):
     informations = []
     try:
